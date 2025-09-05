@@ -48,10 +48,16 @@ def main(argv=None):
         print(out.get("narrative") or out.get("answer", ""))
         if args.out:
             Path(args.out).parent.mkdir(parents=True, exist_ok=True)
-            report = out.get("report") or {}
-            with open(args.out, "w") as f:
-                json.dump(report, f, indent=2)
-            print(f"Saved report to {args.out}", file=sys.stderr)
+            report = out.get("report")
+            if report:
+                with open(args.out, "w") as f:
+                    json.dump(report, f, indent=2)
+                print(f"Saved report to {args.out}", file=sys.stderr)
+            else:
+                print(f"Warning: No report data found. Available keys: {list(out.keys())}", file=sys.stderr)
+                # Save empty report as fallback
+                with open(args.out, "w") as f:
+                    json.dump({}, f, indent=2)
         return 0
 
     if args.cmd == "approve":
