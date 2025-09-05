@@ -1,0 +1,86 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+langgraph-env/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment and secrets
+.env
+.venv
+
+# Byte-compiled / cache
+__pycache__/
+.pytest_cache/
+.cache/
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Project specific
+output/
+*.json
+*.png
+!requirements.txt
+!setup.py
+!pyproject.toml
+
+# Data files (keep sample but exclude large files)
+data/*
+!data/README.md
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# LangSmith
+.langsmith/
+
+# Model caches
+.transformers_cache/
+.huggingface/
