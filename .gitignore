@@ -1,0 +1,13 @@
+# Environment and secrets
+.env
+
+# Byte-compiled / cache
+__pycache__/
+.pytest_cache/
+
+# OS files
+.DS_Store
+
+# Editors
+.vscode/
+.idea/

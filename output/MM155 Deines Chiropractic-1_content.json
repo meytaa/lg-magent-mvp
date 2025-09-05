@@ -1,0 +1,103 @@
+{
+  "document_meta": {
+    "sections": [],
+    "total_pages": 4
+  },
+  "pages": [
+    {
+      "page": 1,
+      "section": null,
+      "page_content": [
+        {
+          "type": "text",
+          "content": "Patient Name\nDate of Birth"
+        },
+        {
+          "type": "image",
+          "content": {
+            "id": "fig_page1_1",
+            "description": "Diagram of a spine with labeled sections and annotations.",
+            "caption": "Spine diagram with annotations.",
+            "path": "output/MM155 Deines Chiropractic-1/images/page_1_img_1.png",
+            "bbox": [
+              0,
+              0,
+              700,
+              1164
+            ]
+          }
+        },
+        {
+          "type": "text",
+          "content": "Neck\nLow back\nHeadaches"
+        }
+      ],
+      "integrated_text": "Patient Name\nDate of Birth Neck\nLow back\nHeadaches"
+    },
+    {
+      "page": 2,
+      "section": null,
+      "page_content": [
+        {
+          "type": "image",
+          "content": {
+            "id": "fig_page2_1",
+            "description": "Image of an insurance card with various information and logos.",
+            "caption": "Insurance card showing personal and policy details.",
+            "path": "output/MM155 Deines Chiropractic-1/images/page_2_img_1.png",
+            "bbox": [
+              0,
+              0,
+              700,
+              540
+            ]
+          }
+        }
+      ],
+      "integrated_text": ""
+    },
+    {
+      "page": 3,
+      "section": null,
+      "page_content": [
+        {
+          "type": "text",
+          "content": "Providers: Prior Authorization Review Required File claims with your local and/or Blue Shield Plan.\n\nYourWyoBlue.com Member Services: 1-800-442-2376 Providers: 1-888-359-6592 Pharmacists: 1-800-424-7094 TTY: 711 Dental: 1-844-653-4057\n\nlicensee of the Blue Shield Association"
+        }
+      ],
+      "integrated_text": "Providers: Prior Authorization Review Required File claims with your local and/or Blue Shield Plan. YourWyoBlue.com Member Services: 1-800-442-2376 Providers: 1-888-359-6592 Pharmacists: 1-800-424-7094 TTY: 711 Dental: 1-844-653-4057 licensee of the Blue Shield Association"
+    },
+    {
+      "page": 4,
+      "section": null,
+      "page_content": [
+        {
+          "type": "text",
+          "content": "About You\nLegal Name: \nPreferred Name: \nAddress: \nCell Phone: \nBirthdate: \nCity: \nHome Phone: \nAge: \nGender: \nWho referred you? \nEmergency Contact \nPatient/Parent Signature\nDate\nState: \nM\nPhone: \nF\nEmployer:\nThis represents a long term authorization for all occasions of service\nYes\nZip: \nSignificant Other:\nPhone:\nHave you been to a chiropractor before?\nIf yes, how long ago?\nUnit 4\nDeines Chiropractic\n307-673-5575\n1823 S. Sheridan Ave\nSheridan, WY 82801\nX-ray okay for minor\nCash\nCheck\nCredit Card\nI authorize the doctor or his staff to render care as deemed appropriate for me and/or my child\nI authorize Deines Chiropractic to release and/or request records to or from other providers as may be necessary.\nI understand I am responsible for all bills incurred in this office\nI authorize assignment of my insurance benefits (if applicable) directly to the provider.\nI understand that after my initial promotional visit, all care is rendered at usual and customary fees\nMy balance after preferred payment method is:\n\nPresent Complaints\n1.\n2.\nHow long has this been an issue?\nHow motivated are you to address the root cause of your issues?\nWhat is your current condition keeping you from?\nWhat makes it better?\nWhat makes it worse?\nWhat doctors have you seen for this?\nType of Treatment:\nResults:\nGetting worseVery Motivated\nOccasional\nIssue:\nStaying the same\nWorse in the morning\nPain radiates to\nDull\nPain radiates to\nPain radiates to\nNumb/Tingle\nStabbing\nWorse in the evening\nSharp\nIS IT:\nIS IT:\nMild\nModerate\nSevere\nWorse in the morning\nMild\nModerate\nSevere\nWorse in the morning\nWorse in the evening\nStabbing\nDull\nMuscle Spasm\nConstant\nAche\nAche\nNot Motivated\n0\n1\n2\n3\n4\n5\n6\n7\n3. \n4. \n5.\nL\n8\n9\n10\nAre you pregnant?\nYes\nNo\nR\nL\nR\nPlease mark all areas of concern"
+        }
+      ],
+      "integrated_text": "About You\nLegal Name: \nPreferred Name: \nAddress: \nCell Phone: \nBirthdate: \nCity: \nHome Phone: \nAge: \nGender: \nWho referred you? \nEmergency Contact \nPatient/Parent Signature\nDate\nState: \nM\nPhone: \nF\nEmployer:\nThis represents a long term authorization for all occasions of service\nYes\nZip: \nSignificant Other:\nPhone:\nHave you been to a chiropractor before?\nIf yes, how long ago?\nUnit 4\nDeines Chiropractic\n307-673-5575\n1823 S. Sheridan Ave\nSheridan, WY 82801\nX-ray okay for minor\nCash\nCheck\nCredit Card\nI authorize the doctor or his staff to render care as deemed appropriate for me and/or my child\nI authorize Deines Chiropractic to release and/or request records to or from other providers as may be necessary.\nI understand I am responsible for all bills incurred in this office\nI authorize assignment of my insurance benefits (if applicable) directly to the provider.\nI understand that after my initial promotional visit, all care is rendered at usual and customary fees\nMy balance after preferred payment method is: Present Complaints\n1.\n2.\nHow long has this been an issue?\nHow motivated are you to address the root cause of your issues?\nWhat is your current condition keeping you from?\nWhat makes it better?\nWhat makes it worse?\nWhat doctors have you seen for this?\nType of Treatment:\nResults:\nGetting worseVery Motivated\nOccasional\nIssue:\nStaying the same\nWorse in the morning\nPain radiates to\nDull\nPain radiates to\nPain radiates to\nNumb/Tingle\nStabbing\nWorse in the evening\nSharp\nIS IT:\nIS IT:\nMild\nModerate\nSevere\nWorse in the morning\nMild\nModerate\nSevere\nWorse in the morning\nWorse in the evening\nStabbing\nDull\nMuscle Spasm\nConstant\nAche\nAche\nNot Motivated\n0\n1\n2\n3\n4\n5\n6\n7\n3. \n4. \n5.\nL\n8\n9\n10\nAre you pregnant?\nYes\nNo\nR\nL\nR\nPlease mark all areas of concern"
+    }
+  ],
+  "summary": {
+    "sections": [],
+    "total_pages": 4,
+    "total_tables": 0,
+    "total_figures": 2,
+    "tables": [],
+    "figures": [
+      {
+        "id": "fig_page1_1",
+        "caption": "Spine diagram with annotations.",
+        "page": 1,
+        "section": null
+      },
+      {
+        "id": "fig_page2_1",
+        "caption": "Insurance card showing personal and policy details.",
+        "page": 2,
+        "section": null
+      }
+    ]
+  }
+}

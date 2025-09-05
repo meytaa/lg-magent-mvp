@@ -1,0 +1,2 @@
+[console_scripts]
+lg-audit = lg_magent_mvp.cli:main

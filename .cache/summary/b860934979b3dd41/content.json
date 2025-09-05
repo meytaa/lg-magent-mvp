@@ -1,0 +1,159 @@
+{
+  "pages_processed": 4,
+  "content_data": {
+    "document_meta": {
+      "sections": [
+        "Patient Information"
+      ],
+      "total_pages": 4
+    },
+    "pages": [
+      {
+        "page": 1,
+        "section": "Patient Information",
+        "page_content": [
+          {
+            "type": "image",
+            "content": {
+              "id": "fig_page1_1",
+              "description": "Image of a spine diagram with vertebrae labeled from 1 to 5 at the top and bottom, and 1 to 12 in the middle. Annotations on the spine include 'AS', 'PI', and 'BR'.",
+              "caption": "Spine diagram with annotations.",
+              "path": "output/summary/MM155 Deines Chiropractic-1/images/page_1_img_1.png",
+              "bbox": [
+                0,
+                0,
+                700,
+                1164
+              ]
+            }
+          },
+          {
+            "type": "text",
+            "content": "Patient Name: [Redacted] Date of Birth: [Redacted]\n\nNeck\n\nLow back\n\nHeadaches"
+          }
+        ],
+        "integrated_text": "Patient Name: [Redacted] Date of Birth: [Redacted] Neck Low back Headaches"
+      },
+      {
+        "page": 2,
+        "section": null,
+        "page_content": [
+          {
+            "type": "image",
+            "content": {
+              "id": "fig_page2_1",
+              "description": "An image of a medical insurance card on a marble surface. The card displays insurance logos, member details, and coverage information.",
+              "caption": "Medical insurance card showing member details and coverage information.",
+              "path": "output/summary/MM155 Deines Chiropractic-1/images/page_2_img_1.png",
+              "bbox": [
+                0,
+                0,
+                700,
+                540
+              ]
+            }
+          }
+        ],
+        "integrated_text": ""
+      },
+      {
+        "page": 3,
+        "section": null,
+        "page_content": [
+          {
+            "type": "image",
+            "content": {
+              "id": "fig_page3_1",
+              "description": "An image of a card with contact information for YourWyoBlue.com. It includes phone numbers for Member Services, Providers, Pharmacists, TTY, and Dental services. There is a note about prior authorization review required and instructions for filing claims with local Blue Shield Plan.",
+              "caption": "YourWyoBlue.com contact information card.",
+              "path": "output/summary/MM155 Deines Chiropractic-1/images/page_3_img_1.png",
+              "bbox": [
+                0,
+                0,
+                700,
+                538
+              ]
+            }
+          }
+        ],
+        "integrated_text": ""
+      },
+      {
+        "page": 4,
+        "section": "Patient Information",
+        "page_content": [
+          {
+            "type": "text",
+            "content": "About You\nLegal Name: Valore Jones\nPreferred Name:\nAddress: 923 Cascade Street\nCity: Sheridan\nState: WY\nZip: 82801\nCell Phone: 201-464-7526\nHome Phone:\nEmail: stakeout@wyomail.com\nBirthdate: 11/14/1997\nAge: 25\nGender: M\nSignificant Other:\nWho referred you?\nEmployer: Silver Railroad\nOccupation: Bank Teller\nEmergency Contact: Austin Jones\nPhone: 307-751-3531\nHave you been to a chiropractor before? Yes\nIf yes, how long ago?\n\nI authorize the doctor or his staff to render care as deemed appropriate for me and/or my child\nI authorize Deines Chiropractic to release and/or request records to or from other providers as may be necessary.\nI understand I am responsible for all bills incurred in this office.\nI authorize assignment of my insurance benefits if applicable directly to the provider.\nI understand that after any initial promotional services, all care is rendered at usual and customary fees.\n\nFor my balance my preferred payment method is: Cash Check Credit Card\n\nPatient/Parent Signature ____________________________ Date ______________\nX-ray okay for minor\n\nPresent Complaints\n1. Back Hips\n2. ________________\nIs it: Dull Sharp Ache Numb/Tingle Stabbing\nMild Moderate Severe\nHow long has this been an issue? Awhile\nConstant Occasional Staying the same Getting worse\nWorse in the morning Worse in the evening Pain radiates to\n\nHow motivated are you to address the root cause of your issues?\n0 1 2 3 4 5 6 7 8 9 10\nNot Motivated Very Motivated\n\nWhat is your current condition keeping you from?\n\nWhat makes it better? _________________\nWhat makes it worse? _________________\nWhat doctors have you seen for this? _________________\nType of Treatment: _________________\nResults: _________________\n\nAre you pregnant?\nYes No\n\nPlease mark all areas of concern\n[L] [R] [L] [R] [L] [R]"
+          }
+        ],
+        "integrated_text": "About You\nLegal Name: Valore Jones\nPreferred Name:\nAddress: 923 Cascade Street\nCity: Sheridan\nState: WY\nZip: 82801\nCell Phone: 201-464-7526\nHome Phone:\nEmail: stakeout@wyomail.com\nBirthdate: 11/14/1997\nAge: 25\nGender: M\nSignificant Other:\nWho referred you?\nEmployer: Silver Railroad\nOccupation: Bank Teller\nEmergency Contact: Austin Jones\nPhone: 307-751-3531\nHave you been to a chiropractor before? Yes\nIf yes, how long ago?\n\nI authorize the doctor or his staff to render care as deemed appropriate for me and/or my child\nI authorize Deines Chiropractic to release and/or request records to or from other providers as may be necessary.\nI understand I am responsible for all bills incurred in this office.\nI authorize assignment of my insurance benefits if applicable directly to the provider.\nI understand that after any initial promotional services, all care is rendered at usual and customary fees.\n\nFor my balance my preferred payment method is: Cash Check Credit Card\n\nPatient/Parent Signature ____________________________ Date ______________\nX-ray okay for minor\n\nPresent Complaints\n1. Back Hips\n2. ________________\nIs it: Dull Sharp Ache Numb/Tingle Stabbing\nMild Moderate Severe\nHow long has this been an issue? Awhile\nConstant Occasional Staying the same Getting worse\nWorse in the morning Worse in the evening Pain radiates to\n\nHow motivated are you to address the root cause of your issues?\n0 1 2 3 4 5 6 7 8 9 10\nNot Motivated Very Motivated\n\nWhat is your current condition keeping you from?\n\nWhat makes it better? _________________\nWhat makes it worse? _________________\nWhat doctors have you seen for this? _________________\nType of Treatment: _________________\nResults: _________________\n\nAre you pregnant?\nYes No\n\nPlease mark all areas of concern\n[L] [R] [L] [R] [L] [R]"
+      }
+    ],
+    "summary": {
+      "sections": [
+        "Patient Information"
+      ],
+      "total_pages": 4,
+      "total_tables": 0,
+      "total_figures": 3,
+      "total_word_count": 580,
+      "total_text_blocks": 2,
+      "text_by_section": {
+        "Patient Information": {
+          "words": 580,
+          "blocks": 2
+        },
+        "null": {
+          "words": 0,
+          "blocks": 0
+        }
+      },
+      "tables": [],
+      "figures": [
+        {
+          "id": "fig_page1_1",
+          "caption": "Spine diagram with annotations.",
+          "page": 1,
+          "section": "Patient Information"
+        },
+        {
+          "id": "fig_page2_1",
+          "caption": "Medical insurance card showing member details and coverage information.",
+          "page": 2,
+          "section": null
+        },
+        {
+          "id": "fig_page3_1",
+          "caption": "YourWyoBlue.com contact information card.",
+          "page": 3,
+          "section": null
+        }
+      ]
+    }
+  },
+  "sections": [
+    "Patient Information"
+  ],
+  "tables": [],
+  "figures": [
+    {
+      "id": "fig_page1_1",
+      "caption": "Spine diagram with annotations.",
+      "page": 1,
+      "section": "Patient Information"
+    },
+    {
+      "id": "fig_page2_1",
+      "caption": "Medical insurance card showing member details and coverage information.",
+      "page": 2,
+      "section": null
+    },
+    {
+      "id": "fig_page3_1",
+      "caption": "YourWyoBlue.com contact information card.",
+      "page": 3,
+      "section": null
+    }
+  ]
+}

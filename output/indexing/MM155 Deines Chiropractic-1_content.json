@@ -1,0 +1,82 @@
+[
+  {
+    "page": 1,
+    "page_content": [
+      {
+        "type": "image",
+        "content": {
+          "description": "Image detected by PDF parser",
+          "tags": [],
+          "caption": "N/A",
+          "path": "output/indexing/MM155 Deines Chiropractic-1/images/page_1_img_1.png",
+          "bbox": [
+            0,
+            0,
+            700,
+            1164
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "page": 2,
+    "page_content": [
+      {
+        "type": "image",
+        "content": {
+          "description": "Image detected by PDF parser",
+          "tags": [],
+          "caption": "N/A",
+          "path": "output/indexing/MM155 Deines Chiropractic-1/images/page_2_img_1.png",
+          "bbox": [
+            0,
+            0,
+            700,
+            540
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "page": 3,
+    "page_content": [
+      {
+        "type": "image",
+        "content": {
+          "description": "Image detected by PDF parser",
+          "tags": [],
+          "caption": "N/A",
+          "path": "output/indexing/MM155 Deines Chiropractic-1/images/page_3_img_1.png",
+          "bbox": [
+            0,
+            0,
+            700,
+            538
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "page": 4,
+    "page_content": [
+      {
+        "type": "image",
+        "content": {
+          "description": "Image detected by PDF parser",
+          "tags": [],
+          "caption": "N/A",
+          "path": "output/indexing/MM155 Deines Chiropractic-1/images/page_4_img_1.png",
+          "bbox": [
+            0,
+            0,
+            700,
+            911
+          ]
+        }
+      }
+    ]
+  }
+]

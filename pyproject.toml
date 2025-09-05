@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lg_magent_mvp"
+version = "0.1.0"
+description = "LangGraph-based medical document audit MVP"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Your Team" }]
+dependencies = [
+  # LangGraph / LangChain stack
+  "langgraph~=0.2.0",
+  "langchain~=0.2.0",
+  "langchain-core~=0.2.0",
+  "langchain-openai~=0.1.0",
+  "langchain-community~=0.2.0",
+
+  # Tracing / env
+  "python-dotenv~=1.0.0",
+
+  # PDF processing
+  "pymupdf~=1.24.0",
+  "pdfplumber~=0.11.0",
+  "camelot-py[cv]~=0.11.0",
+
+  # Vector store
+  "faiss-cpu>=1.7,<2.0",
+
+  # ML/AI models
+  "transformers>=4.20.0",
+  "torch>=1.12.0",
+  "pillow>=8.0.0",
+]
+
+[project.optional-dependencies]
+sentence-transformers = [
+  "langchain-huggingface~=0.0.3",
+  "sentence-transformers>=2.2.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["lg_magent_mvp", "lg_magent_mvp.*"]
+
+[project.scripts]
+lg-audit = "lg_magent_mvp.cli:main"

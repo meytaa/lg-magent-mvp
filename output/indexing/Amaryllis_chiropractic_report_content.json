@@ -1,0 +1,180 @@
+[
+  {
+    "page": 1,
+    "page_content": [
+      {
+        "type": "text",
+        "content": "Patient Information"
+      },
+      {
+        "type": "image",
+        "content": {
+          "description": "A scanned image of a patient's handwritten name, likely from a physical form.",
+          "tags": [
+            "patient_name",
+            "handwritten",
+            "scanned_image",
+            "patient_information"
+          ],
+          "caption": "N/A",
+          "path": "output/indexing/Amaryllis_chiropractic_report/images/page_1_img_1.png",
+          "bbox": [
+            211,
+            84,
+            341,
+            96
+          ]
+        }
+      },
+      {
+        "type": "text",
+        "content": "Date of Birth:"
+      },
+      {
+        "type": "image",
+        "content": {
+          "description": "A scanned image of a patient's handwritten date of birth, likely from a physical form.",
+          "tags": [
+            "date_of_birth",
+            "handwritten",
+            "scanned_image",
+            "patient_information"
+          ],
+          "caption": "N/A",
+          "path": "output/indexing/Amaryllis_chiropractic_report/images/page_1_img_2.png",
+          "bbox": [
+            212,
+            100,
+            268,
+            111
+          ]
+        }
+      },
+      {
+        "type": "text",
+        "content": "Sex:\nFemale\nCase Number:\n8934521\nDate of Service:"
+      },
+      {
+        "type": "image",
+        "content": {
+          "description": "A scanned image of a patient's handwritten date of service, likely from a physical form.",
+          "tags": [
+            "date_of_service",
+            "handwritten",
+            "scanned_image",
+            "patient_information"
+          ],
+          "caption": "N/A",
+          "path": "output/indexing/Amaryllis_chiropractic_report/images/page_1_img_3.png",
+          "bbox": [
+            212,
+            150,
+            268,
+            159
+          ]
+        }
+      },
+      {
+        "type": "text",
+        "content": "Chief Complaint & History\nComplaint:\nPatient presents for a\nroutine wellness adjustment. Reports no new complaints and states they are feeling good overall.\nExpresses a desire to maintain current level of function.\nDate of Onset:\n2023-02-15\nMechanism of Injury:\nPatient slipped\non wet moss while working, landing forcefully on her right side, resulting in an immediate onset of\nsevere low back pain with radicular symptoms down the right leg.\nPain Scale (0–10):\n Now: \n, Worst: \n, Best:\n3/10\n7/10\n1/10\nSleep Impact:\nSleep is moderately disturbed due to pain, causing difficulty finding a\ncomfortable position and intermittent awakenings.\nFunctional Impact:\nDifficulty with prolonged sitting (over 60 minutes), lifting items\nheavier than 20 lbs, and engaging in gardening tasks like deep bending.\nFunctional Rating Index\nPain Intensity\n2\n:\nSleeping\n2\n:\nPersonal Care\n1\n:\nTraveling\n2\n:\nWork\n3\n:\nRecreation\n3\n:\nLifting\n3\n:\nWalking\n1\n:\nStanding\n2\n:\nSitting\n3\n:\nTotal Score:\n \n / 100\n18/40 (45%)\nObjective Findings\nPosture / Observation:\nPostural analysis reveals a mild anterior head carriage, a right high shoulder, and a slight right\npelvic tilt."
+      }
+    ]
+  },
+  {
+    "page": 2,
+    "page_content": [
+      {
+        "type": "text",
+        "content": "Palpation Findings:\nROM:\nOrthopedic Tests:\nNeurological Findings:\nImaging / X-ray:\nDiagnoses\n - \n -\n -\n -\nTreatment Plan\nPlan Description:\nFrequency & Duration:\nHypertonicity and tenderness noted in the\nL4/L5 paraspinal muscles (R>L), right piriformis, right gluteus medius. Active trigger points in the right\nquadratus lumborum. Palpable segmental dysfunction at L5/S1 (PRS) and the right sacroiliac joint.\nLumbar Range of Motion: Flexion limited to 50 degrees with end-range\npain. Extension limited to 20 degrees with localized right-sided pain. Right Lateral Flexion limited to\n15 degrees with pain. Left Lateral Flexion is 20 degrees.\nPositive findings\ninclude: Straight Leg Raise (SLR) on the right at 60 degrees, Braggard's test on the right, Kemp's test\non the right, and Yeoman's test for right sacroiliac joint involvement.\nDeep\nTendon Reflexes (Patellar and Achilles) are +2/4 bilaterally. Myotomes are 5/5 strength in all lower\nextremity muscle groups. Sensation to light touch is intact in L4, L5, and S1 dermatomes.\nInitial radiographs from February 2023 were unremarkable for acute\nfracture or dislocation. No recent imaging has been performed.\nM54.59\nOther low back pain\nM51.17\nLumbosacral disc disorder with radiculopathy\nM99.03\nSegmental and somatic dysfunction of lumbar\nregion\nM99.05\nSegmental and somatic dysfunction of pelvic\nregion\nA course of active chiropractic care including: 1) Chiropractic\nManipulative Treatment (CMT) to lumbar and pelvic regions. 2) Myofascial Release to right piriformis\nand quadratus lumborum. 3) Therapeutic exercises focusing on core stabilization.\nOnce per week for the next 4 weeks, with a re-evaluation scheduled\nat the end of that period to assess progress towards goals.\n"
+      }
+    ]
+  },
+  {
+    "page": 3,
+    "page_content": [
+      {
+        "type": "text",
+        "content": "Short-term Goals:\nLong-term Goals:\nHome Instructions:\nPrognosis\nDaily Chart Note (SOAP)\nS (Subjective):\nO (Objective):\nA (Assessment):\nP (Plan):\nConsent to Treatment\nWithin 4 weeks (by June\n25, 2024): Decrease average pain to <2/10; Increase pain-free lumbar flexion to 55 degrees; Patient\nto tolerate sitting for 75 minutes without pain.\nWithin 8 weeks (by July 23, 2024): Resolve positive orthopedic tests (SLR, Kemp's); Patient to\nreturn to full work duties including lifting 30 lbs; Achieve a Functional Rating Index (FRI) score of\n<10%.\nPatient instructed to continue core strengthening exercises (bird-dog,\ndead bug) daily, use an ice pack on the low back for 15 minutes following aggravating activities, and\nutilize proper lifting mechanics as demonstrated.\nThe prognosis is good for a\nsignificant reduction in symptoms and improvement in function over the next 4-8 weeks with\nadherence to the prescribed treatment plan.\nPatient reports an exacerbation of chronic low back pain, currently\n3/10, with radicular symptoms into the right leg that can spike to 7/10 with activity. Functional\nlimitations in sitting, lifting, and bending persist. FRI score is 18/40 (45%).\nObjective findings include postural asymmetries, palpable hypertonicity in right-sided lumbar and\npelvic musculature, restricted and painful lumbar ROM, and positive orthopedic tests (R SLR, Kemp's,\nYeoman's). Neurological exam is within normal limits. Segmental dysfunction noted at L5/S1 and R SI\njoint.\nExacerbation of chronic lumbosacral disc disorder with radiculopathy and segmental\ndysfunction. The patient's condition warrants continued active care as she has not yet reached\nmaximal medical improvement.\nContinue active care\n1x/week for 4 weeks. Treatment to include CMT, myofascial release, and therapeutic exercises. Home\ncare instructions provided. Re-evaluate in 4 weeks.\n"
+      }
+    ]
+  },
+  {
+    "page": 4,
+    "page_content": [
+      {
+        "type": "text",
+        "content": "I,\nAmaryllis Devereaux, have read and fully understand the above report and consent to the release of\nthis information to my insurance provider. I also consent to the plan of care outlined by Dr. Vance."
+      },
+      {
+        "type": "image",
+        "content": {
+          "description": "A signature, likely that of Amaryllis Devereaux.",
+          "tags": [
+            "signature",
+            "patient signature",
+            "handwritten"
+          ],
+          "caption": "N/A",
+          "path": "output/indexing/Amaryllis_chiropractic_report/images/page_4_img_1.png",
+          "bbox": [
+            211,
+            88,
+            312,
+            100
+          ]
+        }
+      },
+      {
+        "type": "text",
+        "content": "Date:"
+      },
+      {
+        "type": "image",
+        "content": {
+          "description": "A signature, likely a date stamp or handwritten date.",
+          "tags": [
+            "signature",
+            "date",
+            "handwritten",
+            "datestamp"
+          ],
+          "caption": "N/A",
+          "path": "output/indexing/Amaryllis_chiropractic_report/images/page_4_img_2.png",
+          "bbox": [
+            212,
+            105,
+            268,
+            114
+          ]
+        }
+      },
+      {
+        "type": "text",
+        "content": "Provider Certification\nI certify that I provided or supervised all listed treatments.\nProvider Name:\n \n,\nDr. Coraline Vance\nD.C.\nNPI:\n1234567890\nLicense #:\nTN-DC-54321\nSignature:"
+      },
+      {
+        "type": "image",
+        "content": {
+          "description": "A signature, likely that of Dr. Coraline Vance.",
+          "tags": [
+            "signature",
+            "provider signature",
+            "handwritten"
+          ],
+          "caption": "N/A",
+          "path": "output/indexing/Amaryllis_chiropractic_report/images/page_4_img_3.png",
+          "bbox": [
+            212,
+            231,
+            314,
+            242
+          ]
+        }
+      },
+      {
+        "type": "text",
+        "content": "Date:"
+      }
+    ]
+  }
+]
