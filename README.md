@@ -1,79 +1,199 @@
-# LG Magent MVP — Medical PDF Audit (LangGraph)
+# LG-MAgent MVP — Intelligent PDF Analysis System
 
-Purpose: audit medical PDFs and produce a structured JSON report with an executive narrative, grounded in precise citations (pages, tables, figures) and qualified with severity and confidence.
+A sophisticated LangGraph-based multi-agent system for intelligent PDF document analysis with orchestrator-driven architecture.
 
-## Quick Start
+## 🚀 Features
 
-1) Create `.env` from `.env.example` and fill keys:
-- `OPENAI_API_KEY`
-- `LANGSMITH_API_KEY`, optional tracing
+- **🧠 Orchestrator-based Architecture**: Central LLM brain makes intelligent routing decisions based on document content and question context
+- **📊 Multi-modal Analysis**: Advanced text extraction, figure analysis, and table processing with vision models
+- **⚡ Smart Caching System**: Efficient caching for summaries and indexing with automatic invalidation
+- **🎯 Structured Output**: Consistent JSON responses across all agents with confidence scoring
+- **💾 Memory Support**: Optional conversation persistence with LangGraph checkpointing
+- **📈 Text Analytics**: Word count analysis and section-based text statistics
+- **🖼️ Direct PDF Extraction**: Real-time image extraction from PDFs using bounding boxes
+- **🔍 Contextual Analysis**: Question-aware figure and table analysis with orchestrator insights
 
-2) Install
+## 🏗️ Architecture
+
+The system uses an orchestrator-based architecture where a central LLM coordinates specialized agents:
+
 ```
-pip install -e .
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   Orchestrator  │───▶│  Summarize Doc   │───▶│  Analyze Figures│
+│  (Central Brain)│    │ (Structure+Stats)│    │ (Vision Analysis)│
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+         │                       │                       │
+         ▼                       ▼                       ▼
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│ Extract Tables  │    │ Semantic Search  │    │    Finalize     │
+│ (Table Analysis)│    │ (Text Retrieval) │    │ (Report Gen)    │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
 ```
 
-3) Run
-```
-python -m lg_magent_mvp.app
-# or CLI
-lg-audit run --doc "data/MC15 Deines Chiropractic.pdf" --out report.json
+### Agent Responsibilities
+
+- **🎯 Orchestrator**: Analyzes document summary and routes to appropriate agents based on question context
+- **📋 Summarize**: Extracts document structure, identifies figures/tables, calculates text statistics by section
+- **🖼️ Analyze Figures**: Performs detailed vision analysis of specific figures with confidence scoring
+- **📊 Extract Tables**: Advanced table extraction and structured data analysis
+- **🔍 Semantic/Keyword Search**: Intelligent text search with embedding-based retrieval
+- **📝 Finalize**: Generates comprehensive reports with prioritized findings and recommendations
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Python 3.8+
+- OpenAI API key
+- PDF documents to analyze
+
+### Installation
+
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/yourusername/lg-magent-mvp.git
+   cd lg-magent-mvp
+   ```
+
+2. **Install Dependencies**:
+   ```bash
+   pip install -e .
+   ```
+
+3. **Set Environment Variables**:
+   Create a `.env` file from `.env.example`:
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Edit `.env` and add your API keys:
+   ```
+   OPENAI_API_KEY=your-openai-api-key-here
+   LANGSMITH_API_KEY=your-langsmith-key-here  # Optional for tracing
+   ```
+
+### Basic Usage
+
+**Analyze a Document**:
+```bash
+python -m lg_magent_mvp.cli run \
+  --doc "data/MM155 Deines Chiropractic-1.pdf" \
+  --question "What medical conditions are shown in the spine diagrams?" \
+  --out "report.json"
 ```
 
-Optional: enable approvals and persistence
+**Example Output**:
 ```
-echo "APPROVALS=pause-before-finalize" >> .env
+The spine diagram shows potential medical conditions related to neck pain, 
+lower back pain, and headaches, with specific annotations indicating various 
+vertebrae and conditions such as 'AS', 'PI', and 'BR'.
+
+Report saved to report.json
+```
+
+### Advanced Usage
+
+**With Custom Thread ID**:
+```bash
+python -m lg_magent_mvp.cli run \
+  --doc "medical_report.pdf" \
+  --question "Analyze the patient's condition based on the spine diagrams" \
+  --thread "patient_123_analysis" \
+  --out "patient_123_report.json"
+```
+
+**Enable Memory and Approvals**:
+```bash
 echo "USE_MEMORY=true" >> .env
+echo "APPROVALS=pause-before-finalize" >> .env
 
-lg-audit run --doc data/MC15\ Deines\ Chiropractic.pdf --thread demo
-# It pauses awaiting approval; then resume:
-lg-audit approve --thread demo
+python -m lg_magent_mvp.cli run \
+  --doc "data/MM155 Deines Chiropractic-1.pdf" \
+  --question "What conditions are shown?" \
+  --thread "demo"
+
+# System pauses for approval, then resume:
+python -m lg_magent_mvp.cli approve --thread "demo"
 ```
 
-## Features
+## 📊 Report Structure
 
-- Preflight summary: pages, sections, table/figure overview (via PyMuPDF)
-- Adaptive planning: plan considers question and summary
-- Keyword + semantic search (FAISS cache in `.cache/faiss`) using text from PyMuPDF
-- Structured tables (via PyMuPDF `find_tables`) and figure summaries (IDs `T{page}-{n}`, `F{page}-{n}`)
-- Executive narrative (4–6 sentences + prioritized actions)
-- Routing modes: rule, llm, hybrid; loop guard via `MAX_HOPS`
-- Persistence: SQLite checkpointer and thread IDs
-- Approvals: pause-before-finalize option
-- Tracing: LangSmith via `.env` (optional)
+The system generates comprehensive JSON reports with:
 
-## CLI
-
-```
-lg-audit run --doc PATH --question "..." --out report.json --thread NAME [--approve]
-lg-audit approve --thread NAME [--doc PATH]
-```
-
-## Config (env)
-
-- Provider: `OPENAI_API_KEY` (required)
-- Tracing: `LANGSMITH_API_KEY`, `LANGSMITH_PROJECT` (optional)
-- Router: `ROUTER_MODE=rule|llm|hybrid`, `MAX_HOPS=12`
-- Persistence: `USE_MEMORY=true`, `CHECKPOINT_DB=.cache/graph_state.sqlite`
-- FAISS: `FAISS_DIR=.cache/faiss`, `FAISS_CHUNK_SIZE=800`, `FAISS_CHUNK_OVERLAP=150`
-- Vision: `VISION_USE_IMAGES=false`
-
-## Tests
-```
-pytest -q
+```json
+{
+  "report_meta": {
+    "timestamp": "2025-09-05T23:14:56.172013Z",
+    "file": "data/MM155 Deines Chiropractic-1.pdf",
+    "pages": 4,
+    "model_versions": {
+      "router_model": "gpt-4o-mini",
+      "finalize_model": "gpt-4o",
+      "vision_model": "gpt-4o"
+    }
+  },
+  "narrative": "Executive summary with prioritized findings...",
+  "findings": [],
+  "tables": [],
+  "figures": [],
+  "metrics": {
+    "counts": {"critical": 0, "major": 0, "minor": 0},
+    "total_findings": 0
+  }
+}
 ```
 
+## 🔧 Configuration
 
-## Develop Note
+Configure via `config.yaml` or environment variables:
 
-- Summarize should change to some general node, the specific functionality should be added.
-- Have two level of data context one for planning and revieweing and one for interpretation.
-    - Currently, the state is being changed to have context and trace. 
-- Check if it is possible to do have a chat in the orchestrator to have the data history.
-- Make chunking more robust
+- **Model Selection**: Choose between GPT-4, GPT-4o, Claude, etc.
+- **Caching**: Enable/disable summary and indexing caches
+- **Memory**: Persistent conversation state
+- **Vision Models**: Configure image analysis models
+- **Tracing**: LangSmith integration for debugging
 
-- Pass all the pages (if not plain texts) to LLM
-    - What we want is to have a structured pdf, so for each page we know what are the text, what are the images, and what are the tables
-    - For images and tabled, they should be extracted and passed to the LLM as well.
-    - We should have a catalog for each table and figure (an explanation that can to be indexed)
-    - So the orchestrator can have a good overview of all files.
+## 🧪 Example Workflows
+
+### Medical Document Analysis
+```bash
+python -m lg_magent_mvp.cli run \
+  --doc "patient_chart.pdf" \
+  --question "What are the key findings and recommendations?" \
+  --out "medical_analysis.json"
+```
+
+### Research Paper Analysis
+```bash
+python -m lg_magent_mvp.cli run \
+  --doc "research_paper.pdf" \
+  --question "Summarize the methodology and key results from the figures" \
+  --out "research_summary.json"
+```
+
+### Financial Report Analysis
+```bash
+python -m lg_magent_mvp.cli run \
+  --doc "quarterly_report.pdf" \
+  --question "What are the key financial metrics and trends shown in the tables?" \
+  --out "financial_analysis.json"
+```
+
+## 🚀 Key Improvements
+
+This system includes several advanced features:
+
+1. **Smart Document Understanding**: Analyzes document structure and provides detailed statistics (word counts, sections, figures)
+2. **Context-Aware Routing**: Orchestrator makes intelligent decisions based on document content and question type
+3. **Direct PDF Processing**: Extracts images directly from PDFs using bounding boxes for accurate analysis
+4. **Structured Analysis**: All agents return structured data with confidence scores and detailed insights
+5. **Efficient Caching**: Smart caching system prevents redundant processing
+6. **Comprehensive Reporting**: Generates detailed reports with executive narratives and prioritized actions
+
+## 📝 License
+
+MIT License - see LICENSE file for details.
+
+## 🤝 Contributing
+
+Contributions welcome! Please read CONTRIBUTING.md for guidelines.
