@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, List, Dict, Any, Optional
 import json
+import hashlib
+import os
 from pathlib import Path
-import fitz  # PyMuPDF
-from PIL import Image
-from collections import defaultdict
+import numpy as np
+from openai import OpenAI
 
 from . import BaseNode
 
@@ -13,340 +14,207 @@ if TYPE_CHECKING:
     from ..app import AgentState
 
 try:
-    import google.generativeai as genai
-    from google.generativeai.types import HarmCategory, HarmBlockThreshold
-    GEMINI_AVAILABLE = True
+    import faiss
+    FAISS_AVAILABLE = True
 except ImportError:
-    GEMINI_AVAILABLE = False
+    FAISS_AVAILABLE = False
+    print("⚠️ FAISS not available. Install with: pip install faiss-cpu")
 
 
-def detect_page_elements(page, doc) -> List[Dict[str, Any]]:
-    """
-    Use PDF parser to detect all elements on the page (images, tables, text).
-    Returns a list of detected elements with their types and basic info.
-    """
-    elements = []
+def chunk_text(text: str, chunk_size: int = 500, overlap: int = 50) -> List[str]:
+    """Split text into overlapping chunks for better semantic search."""
+    if not text or len(text) <= chunk_size:
+        return [text] if text else []
     
-    # Detect images
-    detected_images = page.get_images(full=True)
-    for i, img_info in enumerate(detected_images):
-        bbox = page.get_image_bbox(img_info)
-        elements.append({
-            "type": "image",
-            "bbox": [round(c) for c in bbox],
-            "img_info": img_info,  # Store for later extraction
-            "order": len(elements)  # Reading order
-        })
+    chunks = []
+    start = 0
     
-    # Detect tables
+    while start < len(text):
+        end = start + chunk_size
+        
+        # Try to break at sentence boundary
+        if end < len(text):
+            # Look for sentence endings within the last 100 characters
+            sentence_end = text.rfind('.', start + chunk_size - 100, end)
+            if sentence_end > start:
+                end = sentence_end + 1
+        
+        chunk = text[start:end].strip()
+        if chunk:
+            chunks.append(chunk)
+        
+        start = end - overlap
+        if start >= len(text):
+            break
+    
+    return chunks
+
+
+def create_embeddings(texts: List[str], client: OpenAI) -> np.ndarray:
+    """Create embeddings for text chunks using OpenAI text-embedding-3-small."""
+    if not texts:
+        return np.array([])
+    
+    print(f"  - Creating embeddings for {len(texts)} text chunks...")
+    
     try:
-        table_finder = page.find_tables()
-        tables = table_finder.tables if hasattr(table_finder, 'tables') else []
-        for i, table in enumerate(tables):
-            bbox = table.bbox
-            elements.append({
-                "type": "table",
-                "bbox": [round(c) for c in bbox],
-                "table_data": table.extract(),  # Extract table data
-                "order": len(elements)
-            })
+        response = client.embeddings.create(
+            model="text-embedding-3-small",
+            input=texts
+        )
+        
+        embeddings = np.array([item.embedding for item in response.data])
+        print(f"  - Created embeddings with shape: {embeddings.shape}")
+        return embeddings
+        
     except Exception as e:
-        print(f"  - Warning: Table detection failed: {e}")
-        # Continue without tables
-    
-    # Detect text blocks (excluding areas covered by images/tables)
-    text_blocks = page.get_text("dict")["blocks"]
-    for block in text_blocks:
-        if "lines" in block:  # Text block
-            bbox = block["bbox"]
-            # Check if this text block overlaps significantly with images/tables
-            overlaps = False
-            for elem in elements:
-                if elem["type"] in ["image", "table"]:
-                    # Simple overlap check - you could make this more sophisticated
-                    elem_bbox = elem["bbox"]
-                    if (bbox[0] < elem_bbox[2] and bbox[2] > elem_bbox[0] and 
-                        bbox[1] < elem_bbox[3] and bbox[3] > elem_bbox[1]):
-                        overlaps = True
-                        break
-            
-            if not overlaps:
-                # Extract text from this block
-                text_content = ""
-                for line in block["lines"]:
-                    for span in line["spans"]:
-                        text_content += span["text"]
-                    text_content += "\n"
-                
-                if text_content.strip():  # Only add non-empty text
-                    elements.append({
-                        "type": "text",
-                        "content": text_content.strip(),
-                        "bbox": [round(c) for c in bbox],
-                        "order": len(elements)
-                    })
-    
-    # Sort by reading order (top to bottom, left to right)
-    elements.sort(key=lambda x: (x["bbox"][1], x["bbox"][0]))  # Sort by y, then x
-    
-    # Join sequential text blocks
-    merged_elements = []
-    i = 0
-    while i < len(elements):
-        current_element = elements[i]
-        
-        if current_element["type"] == "text":
-            # Start collecting sequential text blocks
-            combined_text = current_element["content"]
-            combined_bbox = current_element["bbox"]
-            j = i + 1
-            
-            # Look ahead for more sequential text blocks
-            while j < len(elements) and elements[j]["type"] == "text":
-                # Check if the next text block is reasonably close (sequential)
-                current_bottom = combined_bbox[3]  # bottom y coordinate
-                next_top = elements[j]["bbox"][1]   # top y coordinate
-                vertical_gap = next_top - current_bottom
-                
-                # If the gap is reasonable (less than 50 pixels), merge them
-                if vertical_gap < 50:
-                    combined_text += "\n" + elements[j]["content"]
-                    # Expand bounding box to include the new text
-                    combined_bbox = [
-                        min(combined_bbox[0], elements[j]["bbox"][0]),  # min x
-                        min(combined_bbox[1], elements[j]["bbox"][1]),  # min y
-                        max(combined_bbox[2], elements[j]["bbox"][2]),  # max x
-                        max(combined_bbox[3], elements[j]["bbox"][3])   # max y
-                    ]
-                    j += 1
-                else:
-                    break  # Gap too large, stop merging
-            
-            # Add the merged text element
-            merged_elements.append({
-                "type": "text",
-                "content": combined_text.strip(),
-                "bbox": combined_bbox,
-                "order": len(merged_elements)
-            })
-            
-            i = j  # Skip all the merged elements
-        else:
-            # Non-text element, add as-is
-            merged_elements.append(current_element)
-            i += 1
-    
-    return merged_elements
+        print(f"  - Error creating embeddings: {e}")
+        return np.array([])
 
 
-def get_llm_semantic_analysis(page_image: Image.Image, detected_elements: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """
-    Sends detected elements to LLM for semantic analysis (descriptions, tags, captions).
-    The LLM doesn't do classification - it only provides semantic insights.
-    """
-    if not GEMINI_AVAILABLE:
-        print("  - LLM Semantic Analysis: Gemini not available, skipping")
-        return {"elements": []}
-        
-    print(f"  - LLM Semantic Analysis: Analyzing {len(detected_elements)} detected elements")
-    model = genai.GenerativeModel('gemini-1.5-flash')
+def build_faiss_index(embeddings: np.ndarray) -> Optional[faiss.Index]:
+    """Build FAISS index from embeddings."""
+    if not FAISS_AVAILABLE or embeddings.size == 0:
+        return None
     
-    # Build element descriptions for the prompt
-    element_descriptions = []
-    for i, elem in enumerate(detected_elements):
-        if elem['type'] == 'image':
-            element_descriptions.append(f"Element {i+1}: IMAGE at position {elem.get('bbox', 'unknown')}")
-        elif elem['type'] == 'table':
-            element_descriptions.append(f"Element {i+1}: TABLE at position {elem.get('bbox', 'unknown')}")
-        elif elem['type'] == 'text':
-            text_preview = elem['content'][:100] + "..." if len(elem['content']) > 100 else elem['content']
-            element_descriptions.append(f"Element {i+1}: TEXT - '{text_preview}'")
+    print(f"  - Building FAISS index with {embeddings.shape[0]} vectors...")
     
-    elements_text = "\n".join(element_descriptions)
-    
-    prompt = f"""
-    You are analyzing a document page image. I have already detected the following elements using a PDF parser:
-
-    {elements_text}
-
-    Your task is to provide semantic analysis for each element. Return a JSON object with this structure:
-    {{
-        "elements": [
-            // For each element in order:
-            {{
-                "element_index": 0,  // 0-based index matching the input list
-                "semantic_info": {{
-                    // For images: provide "description" and "tags" 
-                    // For tables: provide "caption" and "summary"
-                    // For text: provide "summary" if it's long, otherwise null
-                }}
-            }}
-        ]
-    }}
-
-    For images: Provide a detailed description of what you see and relevant tags.
-    For tables: Provide a caption/title and brief summary of the table content.
-    For text: Only provide a summary if the text is very long (>200 chars), otherwise leave semantic_info as null.
-
-    Look at the page image and provide semantic analysis for the detected elements.
-    """
-
     try:
-        print(f"  - LLM Semantic Analysis: Making API call to Gemini...")
-        response = model.generate_content([prompt, page_image])
-        print(f"  - LLM Semantic Analysis: Received response (length: {len(response.text)} chars)")
+        # Use IndexFlatIP for cosine similarity (after normalization)
+        dimension = embeddings.shape[1]
+        index = faiss.IndexFlatIP(dimension)
         
-        # Clean up the response to extract the pure JSON
-        json_text = response.text.strip().replace("```json", "").replace("```", "")
-        parsed_json = json.loads(json_text)
+        # Normalize embeddings for cosine similarity
+        faiss.normalize_L2(embeddings)
         
-        return parsed_json
+        # Add embeddings to index
+        index.add(embeddings.astype('float32'))
+        
+        print(f"  - FAISS index built successfully with {index.ntotal} vectors")
+        return index
+        
     except Exception as e:
-        print(f"  - LLM Semantic Analysis: ERROR - {e}")
-        return {"elements": []}
+        print(f"  - Error building FAISS index: {e}")
+        return None
 
 
-def process_pdf_hybrid(pdf_path: str, output_dir: str) -> Dict[str, Any]:
-    """
-    Process PDF using hybrid approach: PDF parser for structure + LLM for semantics.
-    Returns structured content data.
-    """
+def extract_text_from_summary(summary_data: Dict) -> List[Dict[str, Any]]:
+    """Extract text content from summary data for indexing."""
+    text_chunks = []
+    
+    # Get document content from summary
+    document_content = summary_data.get("document_content", [])
+    
+    for page_data in document_content:
+        page_num = page_data.get("page", 1)
+        section = page_data.get("section", "Unknown")
+        
+        # Extract text from page content
+        page_content = page_data.get("page_content", [])
+        page_texts = []
+        
+        for content_item in page_content:
+            if content_item.get("type") == "text":
+                text = content_item.get("content", "")
+                if text and text.strip():
+                    page_texts.append(text.strip())
+        
+        # Also get integrated text if available
+        integrated_text = page_data.get("integrated_text", "")
+        if integrated_text and integrated_text.strip():
+            page_texts.append(integrated_text.strip())
+        
+        # Combine all text from this page
+        if page_texts:
+            full_page_text = " ".join(page_texts)
+            
+            # Chunk the page text
+            chunks = chunk_text(full_page_text)
+            
+            for i, chunk in enumerate(chunks):
+                text_chunks.append({
+                    "text": chunk,
+                    "page": page_num,
+                    "section": section,
+                    "chunk_id": f"page_{page_num}_chunk_{i+1}",
+                    "metadata": {
+                        "page": page_num,
+                        "section": section,
+                        "chunk_index": i,
+                        "total_chunks_on_page": len(chunks)
+                    }
+                })
+    
+    return text_chunks
+
+
+def create_text_index(summary_data: Dict, output_dir: str) -> Dict[str, Any]:
+    """Create FAISS text index from summary data."""
+    if not FAISS_AVAILABLE:
+        print("⚠️ FAISS not available - skipping text indexing")
+        return {"indexed": False, "reason": "FAISS not available"}
+    
+    # Initialize OpenAI client
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    
+    print("🔄 Creating text index from summary data...")
+    
+    # Extract text chunks from summary
+    text_chunks = extract_text_from_summary(summary_data)
+    
+    if not text_chunks:
+        print("⚠️ No text content found in summary data")
+        return {"indexed": False, "reason": "No text content"}
+    
+    print(f"  - Extracted {len(text_chunks)} text chunks from summary")
+    
+    # Create embeddings
+    texts = [chunk["text"] for chunk in text_chunks]
+    embeddings = create_embeddings(texts, client)
+    
+    if embeddings.size == 0:
+        print("⚠️ Failed to create embeddings")
+        return {"indexed": False, "reason": "Embedding creation failed"}
+    
+    # Build FAISS index
+    index = build_faiss_index(embeddings)
+    
+    if index is None:
+        print("⚠️ Failed to build FAISS index")
+        return {"indexed": False, "reason": "FAISS index creation failed"}
+    
+    # Save index and metadata
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
     
-    # Create subdirectories
-    pdf_name = Path(pdf_path).stem
-    doc_output_dir = output_path / pdf_name
-    doc_output_dir.mkdir(exist_ok=True)
-    img_output_dir = doc_output_dir / "images"
-    img_output_dir.mkdir(exist_ok=True)
+    # Save FAISS index
+    index_path = output_path / "text_index.faiss"
+    faiss.write_index(index, str(index_path))
     
-    doc = fitz.open(pdf_path)
-    all_pages_data = []
+    # Save text chunks metadata
+    metadata_path = output_path / "text_chunks.json"
+    with open(metadata_path, 'w', encoding='utf-8') as f:
+        json.dump(text_chunks, f, indent=2, ensure_ascii=False)
     
-    print(f"Processing {doc.page_count} pages...")
-    
-    for page_num in range(doc.page_count):
-        page = doc.load_page(page_num)
-        print(f"\n--- Processing Page {page_num + 1} ---")
-        
-        page_data = {
-            "page": page_num + 1,
-            "page_content": []
-        }
-        
-        # Check if page is complex (has images or tables)
-        has_images = len(page.get_images()) > 0
-        try:
-            table_finder = page.find_tables()
-            has_tables = len(table_finder.tables) > 0 if hasattr(table_finder, 'tables') else False
-        except:
-            has_tables = False
-        is_complex = has_images or has_tables
-        
-        print(f"  - Page complexity: {'Complex' if is_complex else 'Simple'} (images: {has_images}, tables: {has_tables})")
-        
-        if not is_complex:
-            # Simple page: Extract text locally
-            print("  - Extracting text locally...")
-            text = page.get_text("text")
-            page_data["page_content"] = [{"type": "text", "content": text}]
-        else:
-            print("  - Complex page: Using parser + LLM approach...")
-            
-            # Step 1: Use PDF parser to detect all elements
-            print("  - Step 1: Detecting elements with PDF parser...")
-            detected_elements = detect_page_elements(page, doc)
-            print(f"  - Parser detected: {len(detected_elements)} elements")
-            element_types = [elem['type'] for elem in detected_elements]
-            print(f"  - Element types: {element_types}")
-            
-            # Step 2: Render page for LLM semantic analysis
-            pix = page.get_pixmap(dpi=200)
-            page_image = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
-            
-            # Step 3: Get semantic analysis from LLM
-            print("  - Step 2: Getting semantic analysis from LLM...")
-            semantic_analysis = get_llm_semantic_analysis(page_image, detected_elements)
-            
-            # Step 4: Build final JSON structure by combining parser results + LLM insights
-            print("  - Step 3: Building final JSON structure...")
-            final_content = []
-            
-            for i, element in enumerate(detected_elements):
-                # Get semantic info from LLM if available
-                semantic_info = {}
-                if "elements" in semantic_analysis:
-                    for sem_elem in semantic_analysis["elements"]:
-                        if sem_elem.get("element_index") == i:
-                            semantic_info = sem_elem.get("semantic_info", {})
-                            break
-                
-                if element["type"] == "image":
-                    # Save the image file
-                    img_path = img_output_dir / f"page_{page_num+1}_img_{len([e for e in final_content if e['type'] == 'image']) + 1}.png"
-                    img_xref = element["img_info"][0]
-                    img_pix = fitz.Pixmap(doc, img_xref)
-                    print(f"  - Saving image to {img_path}...")
-                    img_pix.save(str(img_path))
-                    
-                    # Build image element
-                    image_content = {
-                        "description": semantic_info.get("description", "Image detected by PDF parser") if semantic_info else "Image detected by PDF parser",
-                        "tags": semantic_info.get("tags", []) if semantic_info else [],
-                        "caption": semantic_info.get("caption", "N/A") if semantic_info else "N/A",
-                        "path": str(img_path),
-                        "bbox": element["bbox"]
-                    }
-                    final_content.append({"type": "image", "content": image_content})
-                    
-                elif element["type"] == "table":
-                    # Build table element
-                    table_content = {
-                        "caption": semantic_info.get("caption", "N/A") if semantic_info else "N/A",
-                        "summary": semantic_info.get("summary", "Table detected by PDF parser") if semantic_info else "Table detected by PDF parser",
-                        "data": element["table_data"],
-                        "bbox": element["bbox"]
-                    }
-                    final_content.append({"type": "table", "content": table_content})
-                    
-                elif element["type"] == "text":
-                    # Build text element
-                    text_content = element["content"]
-                    if semantic_info and semantic_info.get("summary"):
-                        # If LLM provided a summary for long text, we could use it
-                        # For now, just use the original text
-                        pass
-                    final_content.append({"type": "text", "content": text_content})
-            
-            page_data["page_content"] = final_content
-        
-        all_pages_data.append(page_data)
-    
-    doc.close()
-    
-    # Save the structured content
-    content_output_path = output_path / f"{pdf_name}_content.json"
-    with open(content_output_path, 'w', encoding='utf-8') as f:
-        json.dump(all_pages_data, f, indent=2, ensure_ascii=False)
-    
-    print(f"\nHybrid processing complete!")
-    print(f"Content saved to: {content_output_path}")
+    print(f"💾 Saved FAISS index to: {index_path}")
+    print(f"💾 Saved metadata to: {metadata_path}")
     
     return {
-        "pages_processed": len(all_pages_data),
-        "output_path": str(content_output_path),
-        "content_data": all_pages_data
+        "indexed": True,
+        "total_chunks": len(text_chunks),
+        "index_path": str(index_path),
+        "metadata_path": str(metadata_path),
+        "embedding_dimension": embeddings.shape[1]
     }
 
 
 class IndexingNode(BaseNode):
-    """Node for hybrid PDF content indexing using parser + LLM approach."""
+    """Node for creating FAISS text index from summary data."""
 
     def __init__(self):
         super().__init__(
             "indexing",
-            description="Performs hybrid PDF content extraction: parser detects structure, LLM provides semantic analysis."
+            description="Creates FAISS text index from summary data for semantic search using OpenAI embeddings."
         )
 
     def execute(self, state: "AgentState") -> "AgentState":
@@ -354,35 +222,47 @@ class IndexingNode(BaseNode):
         if not doc_path:
             return state
 
+        # Check cache first
+        cache_key = self._get_cache_key(doc_path)
+        cached_result = self._load_from_cache(cache_key, "indexing")
+        
+        if cached_result:
+            print("✅ Using cached text index")
+            self._write_context_data(state, cached_result)
+            self._add_note(state, f"Used cached text index with {cached_result.get('total_chunks', 0)} chunks")
+            return state
+
+        # Get summary data from state (should be available from summary node)
+        summary_data = state.get("doc_summary_raw")  # Raw summary data with full content
+        
+        if not summary_data:
+            print("⚠️ No summary data available - run summary node first")
+            self._add_note(state, "Indexing failed: No summary data available")
+            return state
+
         # Create output directory
-        output_dir = "output/indexing"
+        output_dir = f"output/indexing/{Path(doc_path).stem}"
         
         try:
-            # Process PDF with hybrid approach
-            result = process_pdf_hybrid(doc_path, output_dir)
+            print("🔄 Creating text index from summary data (no cache found)")
+            
+            # Create text index
+            result = create_text_index(summary_data, output_dir)
+            
+            # Cache the result
+            self._save_to_cache(cache_key, result, "indexing")
             
             # Store in context_data
-            self._write_context_data(state, {
-                "pages_processed": result["pages_processed"],
-                "output_path": result["output_path"],
-                "content_summary": {
-                    "total_pages": result["pages_processed"],
-                    "has_structured_content": True
-                }
-            })
+            self._write_context_data(state, result)
             
-            # Store detailed content in trace_data
-            self._write_trace_data(state, result["content_data"], {
-                "doc_path": doc_path,
-                "indexing_method": "hybrid_parser_llm",
-                "output_dir": output_dir
-            })
-            
-            self._add_note(state, f"Indexed {result['pages_processed']} pages with hybrid approach")
+            if result.get("indexed"):
+                self._add_note(state, f"Created text index with {result['total_chunks']} chunks")
+            else:
+                self._add_note(state, f"Indexing failed: {result.get('reason', 'Unknown error')}")
             
         except Exception as e:
             self._add_note(state, f"Indexing failed: {str(e)}")
-            self._write_context_data(state, {"indexing_failed": True, "error": str(e)})
+            self._write_context_data(state, {"indexed": False, "error": str(e)})
         
         return state
 
