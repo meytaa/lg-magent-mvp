@@ -1,1 +1,28 @@
-{}
+{
+  "report_meta": {
+    "timestamp": "2025-09-06T22:23:18.195227Z",
+    "file": "data/MM155 Deines Chiropractic-1.pdf",
+    "pages": 4,
+    "model_versions": {
+      "router_model": "gpt-4o-mini",
+      "finalize_model": "gpt-4o",
+      "vision_model": "gpt-4o",
+      "embed_model": "text-embedding-3-small"
+    }
+  },
+  "document_meta": {},
+  "findings": [],
+  "tables": [],
+  "figures": [],
+  "metrics": {
+    "counts": {
+      "critical": 0,
+      "major": 0,
+      "minor": 0,
+      "info": 0
+    },
+    "by_type": {},
+    "total_findings": 0
+  },
+  "narrative": "The document analysis reveals a focus on spine-related medical conditions, as suggested by the annotations and notes on the spine diagram in figure fig_page1_1 on page 1. This figure highlights potential issues such as neck pain, lower back pain, and headaches. The overall documentation quality regarding medical conditions is limited, as there were no text-based or semantic findings related to specific medical conditions, diseases, or symptoms (keyword and semantic search results). Prioritized actions include: 1) further clarification and documentation on the specific spine conditions indicated by the annotations, 2) supplementing text with more detailed descriptions of medical conditions, and 3) ensuring future documents contain comprehensive medical information across multiple formats, not just figures."
+}

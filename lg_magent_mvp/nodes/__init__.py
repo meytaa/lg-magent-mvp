@@ -112,33 +112,56 @@ class BaseNode(ABC):
             # Format agent result for chat history based on agent type
             result_text = f"AGENT RESULT - {self.node_name}: {'Success' if success else 'Failed'}\n"
 
-            if success and data:
+            if not success:
+                # Handle failed agent results
+                result_text += f"Error: {error or 'Unknown error occurred'}\n"
+                if data and "error" in data:
+                    result_text += f"Details: {data['error']}\n"
+            elif success and data:
                 # Handle keyword search results specifically
                 if self.node_name == "keyword_search" and "results" in data:
                     result_text += f"Found {data.get('hits', 0)} total hits for keywords: {data.get('keywords_searched', [])}\n\n"
-                    result_text += "Key findings:\n"
-
-                    for i, hit in enumerate(data["results"][:5], 1):  # Show top 5 results
-                        page = hit.get('page', 'Unknown')
-                        snippet = hit.get('snippet', '')
-                        # Truncate snippet to reasonable length but keep it informative
-                        if len(snippet) > 200:
-                            snippet = snippet[:200] + "..."
-                        result_text += f"  {i}. Page {page}: {snippet}\n"
+                    if data.get('hits', 0) > 0:
+                        result_text += "Key findings with specific references:\n"
+                        for i, hit in enumerate(data["results"][:5], 1):  # Show top 5 results
+                            page = hit.get('page', 'Unknown')
+                            snippet = hit.get('snippet', hit.get('text', ''))
+                            doc = hit.get('doc', 'document')
+                            span = hit.get('span', [])
+                            # Truncate snippet to reasonable length but keep it informative
+                            if len(snippet) > 200:
+                                snippet = snippet[:200] + "..."
+                            # Include more detailed reference information
+                            ref_info = f"Page {page}"
+                            if span and len(span) >= 2:
+                                ref_info += f" (text span {span[0]}-{span[1]})"
+                            result_text += f"  {i}. {ref_info}: {snippet}\n"
+                    else:
+                        result_text += "No matching keywords found in the document.\n"
 
                 # Handle semantic search results specifically
                 elif self.node_name == "semantic_search" and "results" in data:
                     result_text += f"Found {data.get('hits', 0)} semantically similar passages for query: '{data.get('query', '')}'\n\n"
-                    result_text += "Key findings:\n"
-
-                    for i, hit in enumerate(data["results"][:5], 1):  # Show top 5 results
-                        page = hit.get('page', 'Unknown')
-                        snippet = hit.get('snippet', '')
-                        score = hit.get('score', 0)
-                        # Truncate snippet to reasonable length but keep it informative
-                        if len(snippet) > 200:
-                            snippet = snippet[:200] + "..."
-                        result_text += f"  {i}. Page {page} (score: {score:.3f}): {snippet}\n"
+                    if data.get('hits', 0) > 0:
+                        result_text += "Key findings with specific references:\n"
+                        for i, hit in enumerate(data["results"][:5], 1):  # Show top 5 results
+                            page = hit.get('page', 'Unknown')
+                            snippet = hit.get('snippet', '')
+                            score = hit.get('score', 0)
+                            chunk_id = hit.get('chunk_id', '')
+                            span = hit.get('span', [])
+                            # Truncate snippet to reasonable length but keep it informative
+                            if len(snippet) > 200:
+                                snippet = snippet[:200] + "..."
+                            # Include more detailed reference information
+                            ref_info = f"Page {page} (similarity: {score:.3f})"
+                            if chunk_id:
+                                ref_info += f" [chunk: {chunk_id}]"
+                            if span and len(span) >= 2:
+                                ref_info += f" (text span {span[0]}-{span[1]})"
+                            result_text += f"  {i}. {ref_info}: {snippet}\n"
+                    else:
+                        result_text += "No semantically similar content found for the query.\n"
 
                 # Handle extract_tables agent results specifically
                 elif self.node_name == "extract_tables":
@@ -146,13 +169,22 @@ class BaseNode(ABC):
                     extraction_successful = data.get('extraction_successful', False)
 
                     if extraction_successful and table_count > 0:
-                        result_text += f"Successfully extracted {table_count} tables from the document\n\n"
+                        result_text += f"Successfully extracted {table_count} tables with specific references\n\n"
                         tables = data.get('tables', [])
-                        result_text += "Tables found:\n"
+                        result_text += "Tables found with references:\n"
                         for i, table in enumerate(tables[:3], 1):  # Show first 3 tables
                             page = table.get('page', 'Unknown')
+                            table_id = table.get('table_id', f'T{page}-{i}')
                             rows = len(table.get('rows', []))
-                            result_text += f"  {i}. Table on page {page} ({rows} rows)\n"
+                            title = table.get('title', 'No title')
+                            headers = table.get('headers', [])
+                            result_text += f"  {i}. Table {table_id} on page {page}: {title}\n"
+                            result_text += f"     {rows} rows, {len(headers)} columns\n"
+                            if headers:
+                                headers_preview = ', '.join(headers[:3])
+                                if len(headers) > 3:
+                                    headers_preview += f" (and {len(headers)-3} more)"
+                                result_text += f"     Headers: {headers_preview}\n"
                         if len(tables) > 3:
                             result_text += f"  ... and {len(tables) - 3} more tables\n"
                     else:
@@ -167,20 +199,32 @@ class BaseNode(ABC):
                     overall_insights = data.get('overall_insights', '')
 
                     if success and figures_analyzed > 0:
-                        result_text += f"Successfully analyzed {figures_analyzed} figures: {', '.join(figure_ids)}\n\n"
+                        result_text += f"Successfully analyzed {figures_analyzed} figures with specific references: {', '.join(figure_ids)}\n\n"
 
-                        # Show individual figure analyses
-                        result_text += "Figure Analysis Results:\n"
+                        # Show individual figure analyses with detailed references
+                        result_text += "Figure Analysis Results with References:\n"
                         for i, analysis in enumerate(analyses[:3], 1):  # Show first 3 analyses
                             figure_id = analysis.get('figure_id', 'Unknown')
                             confidence = analysis.get('confidence', 'unknown')
                             key_findings = analysis.get('key_findings', [])
+                            relevance = analysis.get('relevance_to_question', '')
+
+                            # Extract page number from figure_id if possible (e.g., fig_page1_1 -> page 1)
+                            page_num = 'Unknown'
+                            if 'page' in figure_id:
+                                try:
+                                    page_num = figure_id.split('page')[1].split('_')[0]
+                                except:
+                                    page_num = 'Unknown'
                             analysis_text = analysis.get('analysis', '')[:100] + "..." if len(analysis.get('analysis', '')) > 100 else analysis.get('analysis', '')
 
-                            result_text += f"  {i}. {figure_id} (Confidence: {confidence})\n"
+                            result_text += f"  {i}. Figure {figure_id} on page {page_num} (Confidence: {confidence})\n"
                             result_text += f"     Analysis: {analysis_text}\n"
                             if key_findings:
                                 result_text += f"     Key findings: {', '.join(key_findings[:2])}\n"
+                            if relevance:
+                                relevance_preview = relevance[:80] + "..." if len(relevance) > 80 else relevance
+                                result_text += f"     Relevance: {relevance_preview}\n"
                             result_text += "\n"
 
                         if len(analyses) > 3:

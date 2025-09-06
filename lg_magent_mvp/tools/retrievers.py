@@ -102,25 +102,62 @@ def keyword_search(query: str, doc_path: Optional[str] = None, max_hits_per_page
 
 def semantic_search(query: str, doc_path: Optional[str] = None, k: int = 5) -> List[Dict]:
     """Search for semantically similar chunks using FAISS vector index."""
-    doc = doc_path or DEFAULT_DOC_PATH
-    idx_dir = ensure_faiss_index(doc)
-    embedder = get_embedder()
-    if FAISS is None:
-        raise RuntimeError("FAISS is not available. Ensure langchain-community and faiss-cpu are installed.")
-    store = FAISS.load_local(idx_dir, embeddings=embedder, allow_dangerous_deserialization=True)
-    results = store.similarity_search_with_score(query, k=k)
-    hits: List[Dict] = []
-    for doc_chunk, score in results:
-        md = doc_chunk.metadata or {}
-        hits.append({
-            "doc": md.get("doc", doc),
-            "page": int(md.get("page", 1)),
-            "span": md.get("span", [0, 0]),
-            "snippet": md.get("snippet", doc_chunk.page_content[:300]),
-            "score": float(score),
-            "chunk_id": md.get("chunk_id", ""),
-        })
-    return hits
+    try:
+        doc = doc_path or DEFAULT_DOC_PATH
+        idx_dir = ensure_faiss_index(doc)
+        embedder = get_embedder()
+        if FAISS is None:
+            raise RuntimeError("FAISS is not available. Ensure langchain-community and faiss-cpu are installed.")
+        store = FAISS.load_local(idx_dir, embeddings=embedder, allow_dangerous_deserialization=True)
+        results = store.similarity_search_with_score(query, k=k)
+        hits: List[Dict] = []
+        for doc_chunk, score in results:
+            md = doc_chunk.metadata or {}
+            hits.append({
+                "doc": md.get("doc", doc),
+                "page": int(md.get("page", 1)),
+                "span": md.get("span", [0, 0]),
+                "snippet": md.get("snippet", doc_chunk.page_content[:300]),
+                "score": float(score),
+                "chunk_id": md.get("chunk_id", ""),
+            })
+        return hits
+    except Exception as e:
+        # If semantic search fails (e.g., missing API key), fall back to keyword search
+        print(f"Semantic search failed ({str(e)}), falling back to keyword search")
+        # Extract key terms from the query for keyword search
+        query_terms = query.lower().split()
+        # Filter out common stop words
+        stop_words = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'}
+        keywords = [term for term in query_terms if term not in stop_words and len(term) > 2]
+
+        # Fall back to keyword search with extracted terms
+        fallback_hits = []
+        for keyword in keywords[:3]:  # Use top 3 keywords to avoid too many results
+            try:
+                keyword_results = keyword_search(keyword, doc_path=doc_path)
+                fallback_hits.extend(keyword_results)
+            except Exception:
+                continue
+
+        # Remove duplicates and limit results
+        seen = set()
+        unique_hits = []
+        for hit in fallback_hits:
+            hit_id = f"{hit.get('page', 0)}_{hit.get('text', '')[:50]}"
+            if hit_id not in seen and len(unique_hits) < k:
+                seen.add(hit_id)
+                # Convert keyword search format to semantic search format
+                unique_hits.append({
+                    "doc": hit.get("doc", doc_path or DEFAULT_DOC_PATH),
+                    "page": int(hit.get("page", 1)),
+                    "span": hit.get("span", [0, 0]),
+                    "snippet": hit.get("text", "")[:300],
+                    "score": 0.5,  # Default score for fallback results
+                    "chunk_id": hit.get("chunk_id", ""),
+                })
+
+        return unique_hits
 
 
 # Backward-compatible names used by nodes

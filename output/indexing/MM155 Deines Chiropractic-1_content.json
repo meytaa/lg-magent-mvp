@@ -8,13 +8,14 @@
           "description": "Image detected by PDF parser",
           "tags": [],
           "caption": "N/A",
-          "path": "output/indexing/MM155 Deines Chiropractic-1/images/page_1_img_1.png",
           "bbox": [
             0,
             0,
             700,
             1164
-          ]
+          ],
+          "page": 1,
+          "img_xref": 7
         }
       }
     ]
@@ -28,13 +29,14 @@
           "description": "Image detected by PDF parser",
           "tags": [],
           "caption": "N/A",
-          "path": "output/indexing/MM155 Deines Chiropractic-1/images/page_2_img_1.png",
           "bbox": [
             0,
             0,
             700,
             540
-          ]
+          ],
+          "page": 2,
+          "img_xref": 9
         }
       }
     ]
@@ -48,13 +50,14 @@
           "description": "Image detected by PDF parser",
           "tags": [],
           "caption": "N/A",
-          "path": "output/indexing/MM155 Deines Chiropractic-1/images/page_3_img_1.png",
           "bbox": [
             0,
             0,
             700,
             538
-          ]
+          ],
+          "page": 3,
+          "img_xref": 11
         }
       }
     ]
@@ -68,13 +71,14 @@
           "description": "Image detected by PDF parser",
           "tags": [],
           "caption": "N/A",
-          "path": "output/indexing/MM155 Deines Chiropractic-1/images/page_4_img_1.png",
           "bbox": [
             0,
             0,
             700,
             911
-          ]
+          ],
+          "page": 4,
+          "img_xref": 13
         }
       }
     ]

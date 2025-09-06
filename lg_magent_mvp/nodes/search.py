@@ -36,50 +36,77 @@ class KeywordSearchNode(BaseNode):
         if next_action and next_action.get("agent") == "keyword_search":
             state["next_action"] = None
 
-        # Perform search for each keyword
-        all_hits = []
-        for keyword in keywords:
-            hits = your_keyword_search(keyword, doc_path=doc_path)
-            all_hits.extend(hits)
+        try:
+            # Perform search for each keyword
+            all_hits = []
+            for keyword in keywords:
+                hits = your_keyword_search(keyword, doc_path=doc_path)
+                all_hits.extend(hits)
 
-        # Remove duplicates while preserving order
-        seen = set()
-        unique_hits = []
-        for hit in all_hits:
-            hit_id = f"{hit.get('page', 0)}_{hit.get('text', '')[:50]}"
-            if hit_id not in seen:
-                seen.add(hit_id)
-                unique_hits.append(hit)
+            # Remove duplicates while preserving order
+            seen = set()
+            unique_hits = []
+            for hit in all_hits:
+                hit_id = f"{hit.get('page', 0)}_{hit.get('text', '')[:50]}"
+                if hit_id not in seen:
+                    seen.add(hit_id)
+                    unique_hits.append(hit)
 
-        # Store in legacy format for backward compatibility
-        self._add_evidence(state, "keyword_hits", unique_hits)
+            # Store in legacy format for backward compatibility
+            self._add_evidence(state, "keyword_hits", unique_hits)
 
-        # Store in new context_data format
-        search_context = {
-            "hits": unique_hits,
-            "count": len(unique_hits),
-            "query": state["question"],
-            "keywords": keywords,
-            "search_type": "keyword"
-        }
-        self._write_context_data(state, search_context)
+            # Store in new context_data format
+            search_context = {
+                "hits": unique_hits,
+                "count": len(unique_hits),
+                "query": state["question"],
+                "keywords": keywords,
+                "search_type": "keyword"
+            }
+            self._write_context_data(state, search_context)
 
-        # Store detailed trace data
-        self._write_trace_data(state, search_context, {
-            "doc_path": doc_path,
-            "search_method": "your_keyword_search",
-            "parameters": parameters
-        })
+            # Store detailed trace data
+            self._write_trace_data(state, search_context, {
+                "doc_path": doc_path,
+                "search_method": "your_keyword_search",
+                "parameters": parameters
+            })
 
-        # Add structured result for orchestrator
-        result_data = {
-            "hits": len(unique_hits),
-            "keywords_searched": keywords,
-            "results": unique_hits[:5]  # Top 5 results for orchestrator
-        }
-        self._add_agent_result(state, True, result_data)
+            # Add structured result for orchestrator
+            result_data = {
+                "hits": len(unique_hits),
+                "keywords_searched": keywords,
+                "results": unique_hits[:5]  # Top 5 results for orchestrator
+            }
+            self._add_agent_result(state, True, result_data)
 
-        self._add_note(state, f"keyword hits: {len(unique_hits)}")
+            self._add_note(state, f"keyword hits: {len(unique_hits)}")
+
+        except Exception as e:
+            error_msg = f"Keyword search failed: {str(e)}"
+            self._add_note(state, error_msg)
+
+            # Add failed result for orchestrator
+            result_data = {
+                "hits": 0,
+                "keywords_searched": keywords,
+                "results": [],
+                "error": error_msg
+            }
+            self._add_agent_result(state, False, result_data, error=error_msg)
+
+            # Store empty results to prevent further issues
+            self._add_evidence(state, "keyword_hits", [])
+            search_context = {
+                "hits": [],
+                "count": 0,
+                "query": state["question"],
+                "keywords": keywords,
+                "search_type": "keyword",
+                "error": error_msg
+            }
+            self._write_context_data(state, search_context)
+
         return state
 
 
@@ -102,35 +129,62 @@ class SemanticSearchNode(BaseNode):
             state["next_action"] = None
 
         doc_path = state.get("doc_path")
-        hits = your_vector_search(state["question"], doc_path=doc_path)
 
-        # Store in legacy format for backward compatibility
-        self._add_evidence(state, "semantic_hits", hits)
+        try:
+            hits = your_vector_search(state["question"], doc_path=doc_path)
 
-        # Store in new context_data format
-        search_context = {
-            "hits": hits,
-            "count": len(hits),
-            "query": state["question"],
-            "search_type": "semantic"
-        }
-        self._write_context_data(state, search_context)
+            # Store in legacy format for backward compatibility
+            self._add_evidence(state, "semantic_hits", hits)
 
-        # Store detailed trace data
-        self._write_trace_data(state, search_context, {
-            "doc_path": doc_path,
-            "search_method": "your_vector_search"
-        })
+            # Store in new context_data format
+            search_context = {
+                "hits": hits,
+                "count": len(hits),
+                "query": state["question"],
+                "search_type": "semantic"
+            }
+            self._write_context_data(state, search_context)
 
-        # Add structured result for orchestrator
-        result_data = {
-            "hits": len(hits),
-            "query": state["question"],
-            "results": hits[:5]  # Top 5 results for orchestrator
-        }
-        self._add_agent_result(state, True, result_data)
+            # Store detailed trace data
+            self._write_trace_data(state, search_context, {
+                "doc_path": doc_path,
+                "search_method": "your_vector_search"
+            })
 
-        self._add_note(state, f"semantic hits: {len(hits)}")
+            # Add structured result for orchestrator
+            result_data = {
+                "hits": len(hits),
+                "query": state["question"],
+                "results": hits[:5]  # Top 5 results for orchestrator
+            }
+            self._add_agent_result(state, True, result_data)
+
+            self._add_note(state, f"semantic hits: {len(hits)}")
+
+        except Exception as e:
+            error_msg = f"Semantic search failed: {str(e)}"
+            self._add_note(state, error_msg)
+
+            # Add failed result for orchestrator
+            result_data = {
+                "hits": 0,
+                "query": state["question"],
+                "results": [],
+                "error": error_msg
+            }
+            self._add_agent_result(state, False, result_data, error=error_msg)
+
+            # Store empty results to prevent further issues
+            self._add_evidence(state, "semantic_hits", [])
+            search_context = {
+                "hits": [],
+                "count": 0,
+                "query": state["question"],
+                "search_type": "semantic",
+                "error": error_msg
+            }
+            self._write_context_data(state, search_context)
+
         return state
 
 

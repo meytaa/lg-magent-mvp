@@ -186,8 +186,6 @@ def process_pdf_hybrid(pdf_path: str, output_dir: str) -> Dict:
     import fitz
 
     pdf_name = Path(pdf_path).stem
-    img_output_dir = Path(output_dir) / pdf_name / "images"
-    img_output_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"Processing '{pdf_path}' with hybrid approach...")
 
@@ -239,22 +237,17 @@ def process_pdf_hybrid(pdf_path: str, output_dir: str) -> Dict:
 
             for content_item in page_content:
                 if content_item["type"] == "image":
-                    # For images, we need to extract and save them with real bbox
+                    # For images, we just need to extract bbox (no file saving)
                     if detected_images and image_counter <= len(detected_images):
                         img_info = detected_images[image_counter - 1]
-                        img_path = img_output_dir / f"page_{page_num+1}_img_{image_counter}.png"
-                        img_xref = img_info[0]
-                        img_pix = fitz.Pixmap(doc, img_xref)
-                        print(f"  - Saving image to {img_path}...")
-                        img_pix.save(str(img_path))
 
                         # Get real bbox from parser
                         real_bbox = page.get_image_bbox(img_info)
 
-                        # Update the content with the actual file path and real bbox
+                        # Update the content with the real bbox (no file path needed)
                         if isinstance(content_item["content"], dict):
-                            content_item["content"]["path"] = str(img_path)
                             content_item["content"]["bbox"] = [round(c) for c in real_bbox]
+                            content_item["content"]["page"] = page_num + 1
                         image_counter += 1
                 elif content_item["type"] == "table":
                     # For tables, get real bbox from parser

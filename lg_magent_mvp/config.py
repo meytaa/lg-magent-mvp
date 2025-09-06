@@ -38,7 +38,7 @@ class Settings:
 
     # Routing / control flow
     router_mode: str = os.getenv("ROUTER_MODE", "rule").lower()  # rule | llm | hybrid
-    max_hops: int = int(os.getenv("MAX_HOPS", "12"))
+    max_hops: int = int(os.getenv("MAX_HOPS", "15"))
 
     # Persistence / approvals
     use_memory: bool = os.getenv("USE_MEMORY", "true").lower() in {"1", "true", "yes"}

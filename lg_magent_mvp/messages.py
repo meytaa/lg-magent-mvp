@@ -129,7 +129,20 @@ def create_finalize_messages(question: str, evidence: List[Any]) -> List[SystemM
     sys = SystemMessage(content=(
         "You are auditing a medical PDF. Write a concise executive summary (4-6 sentences) "
         "that highlights key risks, overall documentation quality, and top 3-5 prioritized actions. "
-        "Ground your narrative strictly in the given evidence. Do not invent citations."
+        "Ground your narrative strictly in the given evidence. Do not invent citations.\n\n"
+
+        "IMPORTANT - INCLUDE SPECIFIC REFERENCES:\n"
+        "- For text-based findings: mention the specific page number where information was found\n"
+        "- For figure analysis: reference the specific figure ID (e.g., 'fig_page1_1') and page number\n"
+        "- For table data: reference the specific table ID (e.g., 'T1-1') and page number\n"
+        "- For search results: mention the page number and context where information was located\n"
+        "- Use format: 'Based on [source type] on page [X]' or 'As shown in [figure/table ID] on page [X]'\n\n"
+
+        "Example references:\n"
+        "- 'Based on text analysis on page 2...'\n"
+        "- 'As shown in figure fig_page1_1 on page 1...'\n"
+        "- 'According to table T2-1 on page 2...'\n"
+        "- 'Keyword search results from page 3 indicate...'"
     ))
     user = HumanMessage(content=f"Question: {question}\nEvidence: {evidence}")
     return [sys, user]
@@ -216,10 +229,11 @@ def create_orchestrator_messages(context: Dict[str, Any]) -> List[SystemMessage 
 
         "DECISION PROCESS:\n"
         "1. Analyze the question and what information is needed\n"
-        "2. Review preface results (document summary, metadata)\n"
+        "2. Review preface results for agent selection\n"
         "3. Review the full conversation history of previous decisions and agent results\n"
         "4. Determine if more information is needed/available or if ready to finalize\n"
         "5. If more info needed, select the most appropriate agent with specific parameters\n\n"
+        "6.Do not limit yourself to the preface results. You can ask for more information from figures and tables.\n\n"
 
         "RESPONSE FORMAT:\n"
         "You must respond with a structured JSON object containing:\n"
@@ -246,14 +260,19 @@ def create_orchestrator_messages(context: Dict[str, Any]) -> List[SystemMessage 
 
         "DECISION LOGIC:\n"
         "- If more investigation is needed: select appropriate agents\n"
-        "- if you thing that there might be more relevant information in the document, continue untill you are confident that you have all the relevant information\n"
+        "- If you think that there might be more relevant information in the document, continue until you are confident that you have all the relevant information\n"
+        "- Some questions might require multiple rounds of investigation and answers might be combined from multiple sources i.e: figures, tables\n"
         "- If you have sufficient evidence for a comprehensive answer: call finalize agent\n"
-        "- If you are confident that there is not relevant information to answer the uestion, finalize without calling finalize agent and low confidence\n"
+        "- If you are confident that there is no relevant information to answer the question, finalize without calling finalize agent and low confidence\n"
         "- If finalize results are received: provide final_answer and set process_complete=true\n"
-        "- If you have enough information but don't need comprehensive analysis: provide final_answer directly and set process_complete=true\n\n"
+        "- If you have enough information but don't need comprehensive analysis: provide final_answer directly and set process_complete=true\n"
+        "- If an agent fails (returns error), try a different approach or proceed with available information\n"
+        "- AVOID repeating the same failed agent calls - if semantic_search fails, try keyword_search or other agents\n"
+        "- If multiple search attempts yield no results, proceed to finalize with available information\n\n"
 
         "IMPORTANT: You must ALWAYS provide a final_answer when setting process_complete=true. "
-        "Never end the process without providing a final answer to the user's question."
+        "Never end the process without providing a final answer to the user's question. "
+        "Do not get stuck in loops calling the same agent repeatedly - if an approach isn't working, try different agents or finalize."
     ))
 
     # Build the full conversation history
@@ -362,6 +381,7 @@ def create_summary_messages(page_num: int, image_base64: str) -> List[SystemMess
     - For text: Extract the actual text content as a string
     - For images: Provide description and caption (explicit or generated)
     - For tables: Provide description and caption/title
+    - Cover all aspect of the image so can be a reference for decision making of the planner.
     - For section: Try to identify if this page belongs to a specific section (e.g., "Patient Information", "Treatment Plan", "Assessment", etc.)
     - Bounding boxes will be provided by the PDF parser, not by you
     - If any kind of image exists in the page, you MUST provide an image entry in the JSON array even if it's just strings
@@ -404,8 +424,19 @@ def create_figure_analysis_messages(question: str, orchestrator_thoughts: str, f
     1. Detailed analysis of what the figure shows
     2. Key findings or data points visible in the figure
     3. How the figure relates to answering the question
-    4. Your confidence level in the analysisTry to return maximum from image based on the question and the thoughts lead you to.
+    4. Your confidence level in the analysis
+    5. SPECIFIC REFERENCES: Always include the figure ID and page number in your analysis
+
+    REFERENCE FORMAT REQUIREMENTS:
+    - Always mention the specific figure ID (e.g., 'fig_page1_1') in your analysis
+    - Include the page number where the figure is located
+    - Reference specific elements within the figure (annotations, labels, measurements, etc.)
+    - If the figure has a caption, reference it specifically
+    - Use format: 'In figure [figure_id] on page [X], [specific observation]'
+
+    Try to return maximum information from the image based on the question and the thoughts that lead you to it.
     Be thorough but focused on answering the question. Look for specific details, measurements, annotations, or patterns that are relevant.
+    Cover all aspects of the image so it can be a reference for decision making of the planner.
     """
 
     # Create system message
